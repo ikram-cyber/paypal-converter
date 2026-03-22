@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayPal Converter – Daftar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+</div>
+
+<div class="container" style="padding-top: 40px;">
+
+  <div style="text-align:center; margin-bottom: 30px;">
+    <div style="font-size: 50px;">📝</div>
+    <h2>Buat Akun Baru</h2>
+  </div>
+
+  <div class="card">
+    <div id="alertBox"></div>
+
+    <input type="text" id="nama" placeholder="Nama Lengkap" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="text" id="paypalEmail" 
+      placeholder="Email PayPal kamu" />
+    <input type="password" id="password" 
+      placeholder="Password (min 6 karakter)" />
+    <input type="password" id="konfirmasi" 
+      placeholder="Konfirmasi Password" />
+
+    <button class="btn" onclick="register()">
+      DAFTAR SEKARANG
+    </button>
+    <button class="btn btn-outline" 
+      onclick="window.location='index.html'">
+      Sudah punya akun? Login
+    </button>
+  </div>
+
+</div>
+
+<script type="module" src="auth.js"></script>
+
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69c023597eea2e1c39d67db0/1jkb8k5qc';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
+</body>
+</html>
