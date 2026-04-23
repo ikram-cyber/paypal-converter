@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZYNC | Ultimate Social Engine</title>
+    <title>ZYNC | Matrix Social Engine</title>
     <meta name="theme-color" content="#020617">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -22,7 +22,6 @@
 
         body.theme-matrix { --zync-primary: #10b981; --zync-glow: rgba(16, 185, 129, 0.5); --zync-gradient: linear-gradient(45deg, #059669, #10b981, #34d399); }
         body.theme-blaze { --zync-primary: #f97316; --zync-glow: rgba(249, 115, 22, 0.5); --zync-gradient: linear-gradient(45deg, #ea580c, #f97316, #fb923c); }
-        body.theme-light { --bg-color: #f8fafc; --text-color: #0f172a; --card-bg: #ffffff; }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); -webkit-tap-highlight-color: transparent; overflow-x: hidden; transition: 0.3s; }
         
@@ -50,7 +49,6 @@
         .center-heart { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; color: #f43f5e; opacity: 0; pointer-events: none; z-index: 100; filter: drop-shadow(0 0 20px rgba(244,63,94,0.6)); }
         .animate-burst { animation: heartBurst 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .is-liked { color: #f43f5e !important; }
-        .is-saved { color: #eab308 !important; }
         
         .verified-badge { color: #3b82f6; font-size: 11px; margin-left: 4px; }
         input, textarea, select { background: rgba(30, 41, 59, 0.5) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
@@ -67,11 +65,8 @@
         .aura-particle { position: absolute; width: 5px; height: 5px; background: var(--zync-primary); border-radius: 50%; pointer-events: none; animation: auraFloat 3s infinite ease-in; box-shadow: 0 0 8px var(--zync-primary); }
         @keyframes auraFloat { 0% { transform: translateY(0) scale(1); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-120px) scale(0.5); opacity: 0; } }
         .smart-tag { color: var(--zync-primary); font-weight: bold; cursor: pointer; }
-        .smart-mention { color: #f59e0b; font-weight: bold; cursor: pointer; }
         .smart-link { color: #3b82f6; text-decoration: underline; text-underline-offset: 2px; font-weight: bold; }
         
-        .poll-bar { background: rgba(255,255,255,0.1); height: 24px; border-radius: 4px; position: relative; overflow: hidden; margin-top: 4px; cursor: pointer; }
-        .poll-fill { background: var(--zync-glow); height: 100%; position: absolute; left: 0; top: 0; transition: width 0.5s ease; }
         .cover-banner { height: 140px; background: linear-gradient(to bottom, rgba(2,6,23,0), #020617), url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1000&q=80') center/cover; }
     </style>
 </head>
@@ -82,114 +77,69 @@
     <div id="comment-modal" class="bottom-sheet h-[75vh]">
         <div class="flex justify-center pt-3 pb-1"><div class="w-12 h-1.5 bg-slate-700 rounded-full"></div></div>
         <div class="flex justify-between items-center p-4 border-b border-white/10">
-            <h3 class="font-bold text-sm text-center flex-1">Komentar</h3>
+            <h3 class="font-bold text-sm text-center flex-1">Komentar Real-Time</h3>
             <button onclick="closeComments()" class="text-slate-400 absolute right-4"><i class="fas fa-times text-xl"></i></button>
         </div>
         <div id="comment-list" class="flex-1 overflow-y-auto p-4 space-y-5"></div>
         <div class="p-3 border-t border-white/10 flex gap-3 items-center bg-[#020617]">
-            <img id="my-comment-avatar" src="" class="w-8 h-8 rounded-full">
-            <input type="text" id="comment-input" placeholder="Tulis balasan..." class="flex-1 bg-transparent border-none text-sm outline-none">
+            <img id="my-comment-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-8 h-8 rounded-full bg-slate-800">
+            <input type="text" id="comment-input" placeholder="Tulis balasan ke Cloud..." class="flex-1 bg-transparent border-none text-sm outline-none text-white">
             <button onclick="postComment()" class="dynamic-text font-bold text-sm px-2">Kirim</button>
         </div>
     </div>
 
-    <div id="share-modal" class="bottom-sheet h-auto pb-8">
-        <div class="flex justify-center pt-3 pb-1"><div class="w-12 h-1.5 bg-slate-700 rounded-full"></div></div>
-        <h3 class="font-bold text-sm text-center p-4 border-b border-white/10">Bagikan Transmisi</h3>
-        <div class="flex gap-4 p-6 overflow-x-auto no-scrollbar">
-            <div class="flex flex-col items-center gap-2" onclick="alert('Repost ke Feed berhasil!')"><div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-xl text-white"><i class="fas fa-retweet"></i></div><span class="text-[10px]">Repost</span></div>
-            <div class="flex flex-col items-center gap-2" onclick="alert('Ditambahkan ke Story 24 Jam!')"><div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-xl text-white"><i class="fas fa-plus-circle"></i></div><span class="text-[10px]">Story</span></div>
-            <div class="flex flex-col items-center gap-2" onclick="alert('Link disalin ke clipboard!')"><div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-xl text-white"><i class="fas fa-link"></i></div><span class="text-[10px]">Salin Tautan</span></div>
-        </div>
-    </div>
-
     <div id="p-auth" class="page active min-h-screen flex flex-col items-center justify-center px-8 text-center relative overflow-hidden">
-        <div class="mb-10 relative z-10" id="auth-logo">
+        <div class="mb-10 relative z-10">
             <div class="w-24 h-24 rounded-full dynamic-bg flex items-center justify-center text-white text-5xl font-black shadow-[0_0_40px_var(--zync-glow)] mx-auto mb-6 border-4 border-[#020617]">
                 <i class="fas fa-fingerprint"></i>
             </div>
             <h1 class="text-4xl font-black tracking-[0.25em] brand-glow uppercase">ZYNC</h1>
-            <p class="text-[9px] uppercase tracking-[0.3em] mt-2 text-slate-500 font-bold">Matrix Core System</p>
+            <p class="text-[9px] uppercase tracking-[0.3em] mt-2 text-slate-500 font-bold">Cloud Matrix Online</p>
         </div>
         <div class="w-full max-w-sm bg-slate-900/60 backdrop-blur-3xl rounded-[2.5rem] p-8 border border-white/10 relative z-10 shadow-2xl">
-            <h2 id="auth-title" class="text-xl font-bold mb-6 text-white/90">Login ke Matrix</h2>
+            <h2 id="auth-title" class="text-xl font-bold mb-6 text-white/90">Login ke Jaringan</h2>
             <div class="space-y-4">
-                <div id="div-user" class="hidden"><input type="text" id="auth-user" placeholder="Username" class="w-full rounded-xl px-5 py-3.5 text-sm outline-none"></div>
-                <input type="email" id="auth-email" placeholder="Email" class="w-full rounded-xl px-5 py-3.5 text-sm outline-none">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full rounded-xl px-5 py-3.5 text-sm outline-none">
-                <button onclick="handleAuth()" id="auth-btn" class="w-full dynamic-bg py-3.5 rounded-xl font-black text-[#020617] text-sm mt-2">Log In</button>
+                <div id="div-user" class="hidden"><input type="text" id="auth-user" placeholder="Username (Tanpa Spasi)" class="w-full rounded-xl px-5 py-3.5 text-sm outline-none"></div>
+                <input type="email" id="auth-email" placeholder="Email Terdaftar" class="w-full rounded-xl px-5 py-3.5 text-sm outline-none">
+                <input type="password" id="auth-pass" placeholder="Security Key" class="w-full rounded-xl px-5 py-3.5 text-sm outline-none">
+                <button onclick="handleAuth()" id="auth-btn" class="w-full dynamic-bg py-3.5 rounded-xl font-black text-[#020617] text-sm mt-2 transition-all">Log In</button>
             </div>
             <div class="mt-6 flex flex-col items-center gap-2 text-xs text-slate-400">
-                <p><span id="auth-toggle-txt">Belum punya akun?</span> <button onclick="toggleAuth()" id="auth-toggle-btn" class="dynamic-text font-bold ml-1">Daftar</button></p>
+                <p><span id="auth-toggle-txt">Node baru?</span> <button onclick="toggleAuth()" id="auth-toggle-btn" class="dynamic-text font-bold ml-1">Generate</button></p>
             </div>
         </div>
     </div>
 
     <div id="main-app" class="hidden">
-        
         <header id="main-header" class="glass-nav-top fixed top-0 left-0 right-0 z-50 px-4 flex justify-between items-center h-14">
             <h1 class="text-2xl font-black tracking-tighter text-white brand-glow">Z<span class="dynamic-text">Y</span>NC</h1>
             <div class="flex items-center gap-5 text-xl text-white">
-                <i class="far fa-heart cursor-pointer" onclick="bukaTab('notif')"></i>
-                <i class="fab fa-facebook-messenger cursor-pointer" onclick="alert('Neural DM System: Persiapan Firebase')"></i>
+                <i class="far fa-heart cursor-pointer"></i>
+                <i class="fab fa-facebook-messenger cursor-pointer"></i>
             </div>
         </header>
 
         <main id="p-home" class="page pt-14 pb-16">
-            <div class="flex gap-4 overflow-x-auto px-4 py-3 border-b border-white/5 no-scrollbar">
-                <div class="flex flex-col items-center gap-1 shrink-0 relative">
-                    <img id="my-story-avatar" src="" class="w-16 h-16 rounded-full border-2 border-[#020617] bg-slate-800 object-cover">
-                    <div class="absolute bottom-4 right-0 dynamic-bg rounded-full w-5 h-5 flex items-center justify-center border-2 border-[#020617]"><i class="fas fa-plus text-[10px] text-black"></i></div>
-                    <span class="text-[10px] text-slate-400">Cerita Anda</span>
-                </div>
-                <div id="story-list" class="flex gap-4"></div>
+            <div class="flex px-4 py-2 gap-4 text-xs font-bold border-b border-white/5 bg-[#020617]">
+                <button class="dynamic-text border-b-2 dynamic-border pb-1">Global Transmissions</button>
+                <div class="ml-auto text-slate-500 animate-pulse flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Cloud Sync Active</div>
             </div>
-            <div id="feed-container" class="flex flex-col"></div>
-        </main>
-
-        <main id="p-explore" class="page pt-14 pb-16">
-            <div class="p-3">
-                <div class="bg-slate-800 rounded-xl flex items-center px-4 py-2.5 mb-4 border border-white/5">
-                    <i class="fas fa-search text-slate-400 text-sm"></i>
-                    <input type="text" id="search-engine" placeholder="Cari Konten atau Node..." class="w-full bg-transparent border-none outline-none text-sm ml-3 p-0 text-white">
-                </div>
-                <div id="explore-grid" class="grid-container rounded-xl overflow-hidden"></div>
+            <div id="feed-container" class="flex flex-col">
+                <p class="text-center text-slate-500 text-sm mt-10 animate-pulse">Menyelaraskan data dari Cloud Matrix...</p>
             </div>
-        </main>
-
-        <main id="p-reels" class="page pt-0 pb-12 bg-black h-screen relative">
-            <div class="absolute top-4 left-4 z-50 font-black text-xl drop-shadow-md">Zync-Shorts</div>
-            <div id="reels-container" class="reels-container"></div>
         </main>
 
         <main id="p-post" class="page pt-14 px-4 pb-16">
             <div class="flex justify-between items-center py-2 border-b border-white/10 mb-4">
                 <button onclick="bukaTab('home')" class="text-white text-lg"><i class="fas fa-times"></i></button>
-                <h2 class="font-bold text-sm">Transmisi Baru</h2>
-                <button onclick="kirimPost()" class="dynamic-text font-bold text-sm bg-cyan-500/10 px-4 py-1.5 rounded-full">Broadcast</button>
+                <h2 class="font-bold text-sm">Upload ke Cloud</h2>
+                <button onclick="kirimPost()" id="btn-broadcast" class="dynamic-text font-bold text-sm bg-cyan-500/10 px-4 py-1.5 rounded-full transition-all">Broadcast</button>
             </div>
             <div class="flex gap-3 mb-4">
-                <img id="post-my-avatar" src="" class="w-10 h-10 rounded-full object-cover">
-                <textarea id="post-content" rows="4" placeholder="Apa yang terjadi di Matrix hari ini?" class="w-full bg-transparent border-none p-0 text-sm outline-none resize-none text-white"></textarea>
+                <img id="post-my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-10 h-10 rounded-full object-cover bg-slate-800">
+                <textarea id="post-content" rows="6" placeholder="Apa yang ingin kamu pancarkan ke seluruh dunia? (Gunakan # untuk tagar)" class="w-full bg-transparent border-none p-0 text-sm outline-none resize-none text-white"></textarea>
             </div>
-            <div class="space-y-3">
-                <input type="text" id="post-img" placeholder="🔗 URL Media (Gambar/GIF)" class="w-full bg-slate-900 rounded-xl px-4 py-3 text-xs outline-none border border-white/5">
-                <input type="text" id="post-loc" placeholder="📍 Lokasi (Check-in)" class="w-full bg-slate-900 rounded-xl px-4 py-3 text-xs outline-none border border-white/5">
-                
-                <div class="bg-slate-900 rounded-xl p-4 border border-white/5">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-slate-300"><i class="fas fa-poll-h mr-2 text-cyan-400"></i>Buat Polling (Voting)</span>
-                        <input type="checkbox" id="toggle-poll" class="toggle-checkbox hidden">
-                        <label for="toggle-poll" class="w-10 h-5 bg-slate-700 rounded-full relative cursor-pointer block" onclick="document.getElementById('poll-inputs').classList.toggle('hidden')">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-all"></div>
-                        </label>
-                    </div>
-                    <div id="poll-inputs" class="hidden space-y-2 mt-3">
-                        <input type="text" id="poll-opt-1" placeholder="Opsi 1" class="w-full bg-slate-800 rounded-lg px-3 py-2 text-xs outline-none">
-                        <input type="text" id="poll-opt-2" placeholder="Opsi 2" class="w-full bg-slate-800 rounded-lg px-3 py-2 text-xs outline-none">
-                    </div>
-                </div>
-            </div>
+            <input type="text" id="post-img" placeholder="🔗 URL Media Tambahan (Gambar/GIF)" class="w-full bg-slate-900 rounded-xl px-4 py-3 text-xs outline-none border border-white/5">
         </main>
 
         <main id="p-profile" class="page pt-0 pb-16">
@@ -203,58 +153,33 @@
                 <div id="aura-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-50"></div>
                 <div class="flex justify-between items-end relative z-10">
                     <div class="w-24 h-24 rounded-full zync-ring-active bg-slate-900 p-1">
-                        <img id="prof-avatar" src="" class="w-full h-full rounded-full border-4 border-[#020617] object-cover">
+                        <img id="prof-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-full h-full rounded-full border-4 border-[#020617] object-cover bg-slate-800">
                     </div>
                     <div class="flex gap-4 text-center mb-2">
-                        <div class="cursor-pointer"><p class="font-bold text-lg" id="stat-posts">0</p><p class="text-[10px] text-slate-400 uppercase">Transmisi</p></div>
-                        <div class="cursor-pointer"><p class="font-bold text-lg" id="stat-followers">12.4K</p><p class="text-[10px] text-slate-400 uppercase">Pengikut</p></div>
-                        <div class="cursor-pointer"><p class="font-bold text-lg">245</p><p class="text-[10px] text-slate-400 uppercase">Mengikuti</p></div>
+                        <div><p class="font-bold text-lg" id="stat-posts">0</p><p class="text-[10px] text-slate-400 uppercase">Postingan</p></div>
+                        <div><p class="font-bold text-lg">Cloud</p><p class="text-[10px] text-slate-400 uppercase">Jaringan</p></div>
                     </div>
                 </div>
                 <div class="mt-3 relative z-10">
-                    <h2 class="font-black text-xl flex items-center gap-1"><span id="prof-name"></span> <i id="prof-badge" class="hidden fas fa-check-circle verified-badge"></i></h2>
-                    <p class="text-sm text-slate-400 font-bold" id="prof-user"></p>
-                    <p class="text-sm text-white mt-2 leading-relaxed" id="prof-bio">Developer Mode | Menunggu Sinkronisasi Firebase 💻⚡</p>
-                    <p class="text-sm mt-1" id="prof-link"><a href="#" class="smart-link"><i class="fas fa-link text-xs mr-1"></i>ikram-cyber.tech</a></p>
-                    <p class="text-xs text-slate-500 mt-2 flex items-center gap-2"><i class="fas fa-bolt dynamic-text"></i> Aura Rank: <span id="aura-val" class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded">0</span></p>
+                    <h2 class="font-black text-xl flex items-center gap-1"><span id="prof-name">Memuat...</span> <i id="prof-badge" class="hidden fas fa-check-circle verified-badge"></i></h2>
+                    <p class="text-sm text-slate-400 font-bold" id="prof-user">@matrix_user</p>
+                    <p class="text-sm text-white mt-2 leading-relaxed" id="prof-bio">Node terhubung ke Firebase Matrix ZYNC.</p>
                 </div>
                 <div class="flex gap-2 mt-5 relative z-10">
-                    <button onclick="bukaTab('settings')" class="flex-1 bg-slate-800 text-white font-bold text-sm py-2 rounded-xl border border-white/5 hover:bg-slate-700">Edit Profil</button>
-                    <button class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl border border-white/5"><i class="fas fa-share-alt"></i></button>
+                    <button onclick="bukaTab('settings')" class="flex-1 bg-slate-800 text-white font-bold text-sm py-2 rounded-xl border border-white/5">Edit Identitas</button>
                 </div>
             </div>
-            <div class="flex mt-4 border-t border-white/10 sticky top-14 bg-[var(--bg-color)] z-20">
-                <button class="flex-1 py-3 text-center border-b-2 dynamic-border dynamic-text"><i class="fas fa-th"></i></button>
-                <button class="flex-1 py-3 text-center text-slate-500"><i class="fas fa-play"></i></button>
-            </div>
-            <div id="profile-grid" class="grid-container"></div>
         </main>
 
-        <main id="p-notif" class="page pt-14 pb-16 px-4">
-            <h2 class="font-black text-xl mb-4 mt-2">Activity Radar</h2>
-            <div id="notif-container" class="space-y-4"></div>
-        </main>
-
-        <main id="p-settings" class="page pt-14 pb-16 px-4 min-h-screen">
-            <div class="flex items-center justify-between mb-6 mt-2 pb-4 border-b border-white/5">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-arrow-left text-xl cursor-pointer" onclick="bukaTab('profile')"></i>
-                    <h2 class="font-black text-xl tracking-widest uppercase brand-glow">Control Panel</h2>
-                </div>
+        <main id="p-settings" class="page pt-14 pb-16 px-4 bg-[#020617] min-h-screen">
+            <div class="flex items-center gap-3 mb-6 mt-2 pb-4 border-b border-white/5">
+                <i class="fas fa-arrow-left text-xl cursor-pointer" onclick="bukaTab('profile')"></i>
+                <h2 class="font-black text-xl tracking-widest uppercase brand-glow">Control Panel</h2>
             </div>
             <div class="space-y-6">
                 <div class="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-cyan-500 mb-4">Informasi Pribadi</h3>
-                    <div class="space-y-3">
-                        <div><label class="text-[10px] uppercase font-bold text-slate-400">Display Name</label><input type="text" id="set-name" class="w-full bg-slate-800 rounded-lg p-3 text-sm mt-1"></div>
-                        <div><label class="text-[10px] uppercase font-bold text-slate-400">Bio Slogan</label><textarea id="set-bio" rows="2" class="w-full bg-slate-800 rounded-lg p-3 text-sm mt-1"></textarea></div>
-                        <div><label class="text-[10px] uppercase font-bold text-slate-400">Hyperlink Web</label><input type="text" id="set-link" class="w-full bg-slate-800 rounded-lg p-3 text-sm mt-1" placeholder="https://..."></div>
-                        <button onclick="saveProfile()" class="w-full dynamic-bg text-[#020617] font-bold text-sm py-3 rounded-xl mt-2">Simpan Perubahan</button>
-                    </div>
-                </div>
-                <div class="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-cyan-500 mb-4">Tema UI</h3>
-                    <div class="grid grid-cols-2 gap-2">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-cyan-500 mb-4">UI Engine & Tema</h3>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
                         <button onclick="changeTheme('default')" class="bg-[#06b6d4] text-black font-bold text-xs py-3 rounded-lg">CYAN CORE</button>
                         <button onclick="changeTheme('matrix')" class="bg-[#10b981] text-black font-bold text-xs py-3 rounded-lg">MATRIX GREEN</button>
                         <button onclick="changeTheme('blaze')" class="bg-[#f97316] text-black font-bold text-xs py-3 rounded-lg">BLAZE ORANGE</button>
@@ -262,8 +187,7 @@
                 </div>
                 <div class="bg-rose-950/20 p-4 rounded-2xl border border-rose-500/20">
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-4">Danger Zone</h3>
-                    <button onclick="logout()" class="w-full bg-slate-800 text-white font-bold text-sm py-3 rounded-xl mb-3 border border-white/5">Keluar (Logout)</button>
-                    <button onclick="purgeData()" class="w-full bg-rose-600/20 text-rose-500 font-black text-sm py-3 rounded-xl border border-rose-500/50">HAPUS DATA LOKAL</button>
+                    <button onclick="logoutFromMatrix()" class="w-full bg-slate-800 text-white font-bold text-sm py-3 rounded-xl mb-3 border border-white/5">Keluar Cloud (Logout)</button>
                 </div>
             </div>
         </main>
@@ -273,204 +197,283 @@
             <button class="nav-item text-xl" onclick="bukaTab('explore')" id="nav-explore"><i class="fas fa-search"></i></button>
             <button class="nav-item text-xl" onclick="bukaTab('post')" id="nav-post"><i class="far fa-plus-square"></i></button>
             <button class="nav-item text-xl" onclick="bukaTab('reels')" id="nav-reels"><i class="fas fa-video"></i></button>
-            <button class="nav-item w-7 h-7 rounded-full overflow-hidden border border-white/20" onclick="bukaTab('profile')" id="nav-profile"><img id="nav-my-avatar" src="" class="w-full h-full object-cover"></button>
+            <button class="nav-item w-7 h-7 rounded-full overflow-hidden border border-white/20" onclick="bukaTab('profile')" id="nav-profile"><img id="nav-my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-full h-full object-cover bg-slate-800"></button>
         </nav>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, setDoc, getDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { firebaseConfig } from "./firebase-config.js";
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State & Variabel Global
+        window.currentUser = null;
+        window.allPosts = [];
+        window.currentPostIdForComment = null;
         let isLoginMode = true;
-        let currentUser = JSON.parse(localStorage.getItem('zync_session'));
-        let aura = parseInt(localStorage.getItem('zync_aura')) || 0;
-        let currentPostIdForComment = null;
         let currentTheme = localStorage.getItem('zync_theme') || 'default';
-        
         document.body.className = currentTheme === 'matrix' ? 'theme-matrix' : currentTheme === 'blaze' ? 'theme-blaze' : '';
 
-        let posts = JSON.parse(localStorage.getItem('zync_db')) || [
-            { id: 1, name: "Zync Core", user: "@zync_admin", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Zync", content: "Tampilan Frontend selesai. Persiapan sinkronisasi Firebase dimulai! #ZyncIt", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80", likes: 8520, isLiked: false, saved: false, verified: true, time: "Baru saja", location: "Localhost", comments: [] }
-        ];
-
-        let reelsData = [ "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=1200&fit=crop" ];
-
-        function playSfx(type = 'tap') { /* Simulasi Audio Dimatikan Sementara untuk Performa */ }
-
-        function createParticles() {
-            const container = document.getElementById('aura-container');
-            if(!container) return; container.innerHTML = '';
-            for(let i=0; i < Math.min(aura/10, 40); i++) {
-                let p = document.createElement('div'); p.className = 'aura-particle'; p.style.left = Math.random() * 100 + '%'; p.style.top = Math.random() * 100 + '%'; p.style.animationDelay = Math.random() * 3 + 's'; container.appendChild(p);
-            }
-        }
-
-        function toggleAuth() {
+        // UI Toggles
+        window.toggleAuth = () => {
             isLoginMode = !isLoginMode;
             document.getElementById('div-user').classList.toggle('hidden');
-            document.getElementById('auth-title').innerText = isLoginMode ? "Login ke Matrix" : "Buat Identitas Zync";
+            document.getElementById('auth-title').innerText = isLoginMode ? "Login ke Jaringan" : "Generate Node Baru";
             document.getElementById('auth-btn').innerText = isLoginMode ? "Log In" : "Daftar";
-            document.getElementById('auth-toggle-txt').innerText = isLoginMode ? "Belum punya akun?" : "Sudah punya akun?";
-            document.getElementById('auth-toggle-btn').innerText = isLoginMode ? "Daftar" : "Login";
-        }
+            document.getElementById('auth-toggle-txt').innerText = isLoginMode ? "Node baru?" : "Sudah punya akses?";
+            document.getElementById('auth-toggle-btn').innerText = isLoginMode ? "Generate" : "Login";
+        };
 
-        function handleAuth() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            const user = document.getElementById('auth-user').value;
-            if(!email || !pass) return alert("Isi data!");
-            let users = JSON.parse(localStorage.getItem('zync_users')) || [];
-            if(isLoginMode) {
-                const found = users.find(u => u.email === email && u.pass === pass);
-                if(found) { localStorage.setItem('zync_session', JSON.stringify(found)); location.reload(); } else alert("Akses Ditolak.");
-            } else {
-                if(!user) return alert("Username kosong!");
-                users.push({ user: "@"+user.replace(/\s+/g,'').toLowerCase(), email, pass, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user}`, verified: false, name: user, bio: "", link: "" });
-                localStorage.setItem('zync_users', JSON.stringify(users)); alert("Berhasil Mendaftar!"); toggleAuth();
-            }
-        }
-
-        function logout() { localStorage.removeItem('zync_session'); location.reload(); }
-        function purgeData() { if(confirm("Hapus data lokal?")) { localStorage.clear(); location.reload(); } }
-        function changeTheme(themeName) { localStorage.setItem('zync_theme', themeName); location.reload(); }
-
-        function bukaTab(tabId) {
+        window.bukaTab = (tabId) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active'); if(n.id !== 'nav-profile') n.innerHTML = n.innerHTML.replace('fas', 'far'); });
             document.getElementById('p-' + tabId).classList.add('active');
             let navIcon = document.getElementById('nav-'+tabId);
             if(navIcon) { navIcon.classList.add('active'); if(tabId !== 'profile') navIcon.innerHTML = navIcon.innerHTML.replace('far', 'fas'); }
-
-            document.getElementById('main-header').style.display = (tabId === 'reels' || tabId === 'post' || tabId === 'settings') ? 'none' : 'flex';
+            document.getElementById('main-header').style.display = (tabId === 'post' || tabId === 'settings') ? 'none' : 'flex';
             document.getElementById('main-bottom-nav').style.display = (tabId === 'settings') ? 'none' : 'flex';
             window.scrollTo(0,0);
             
-            if(tabId === 'home') { renderFeed(); renderStories(); }
-            if(tabId === 'explore') renderExplore();
-            if(tabId === 'reels') renderReels();
-            if(tabId === 'notif') renderNotif();
-            if(tabId === 'settings') { 
-                document.getElementById('set-name').value = currentUser.name || ""; document.getElementById('set-bio').value = currentUser.bio || ""; document.getElementById('set-link').value = currentUser.link || "";
+            if(tabId === 'profile' && window.currentUser) {
+                let myPostsCount = window.allPosts.filter(p => p.user === window.currentUser.user).length;
+                document.getElementById('stat-posts').innerText = myPostsCount;
             }
-            if(tabId === 'profile') {
-                document.getElementById('prof-name').innerHTML = currentUser.name; document.getElementById('prof-header-name').innerHTML = currentUser.user;
-                if(currentUser.verified) document.getElementById('prof-badge').classList.remove('hidden');
-                document.getElementById('prof-bio').innerHTML = currentUser.bio || "Menunggu Data Firebase...";
-                document.getElementById('prof-link').innerHTML = currentUser.link ? `<a href="${currentUser.link}" class="smart-link"><i class="fas fa-link text-xs mr-1"></i>${currentUser.link}</a>` : '';
-                document.getElementById('aura-val').innerText = aura;
-                let myPosts = posts.filter(p => p.user === currentUser.user); document.getElementById('stat-posts').innerText = myPosts.length;
-                renderProfileGrid(myPosts); createParticles();
+        };
+
+        window.changeTheme = (themeName) => { localStorage.setItem('zync_theme', themeName); location.reload(); };
+
+        // AUTHENTICATION LOGIC
+        window.handleAuth = async () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            const user = document.getElementById('auth-user').value;
+            const btn = document.getElementById('auth-btn');
+            
+            if(!email || !pass) return alert("Kredensial wajib diisi!");
+            btn.innerText = "Connecting..."; btn.disabled = true;
+
+            try {
+                if(isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } else {
+                    if(!user) throw new Error("Username kosong!");
+                    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                    const isVerified = user.toLowerCase().includes('ikram');
+                    const userData = {
+                        uid: userCred.user.uid,
+                        user: "@" + user.replace(/\s+/g,'').toLowerCase(),
+                        name: user,
+                        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user}`,
+                        verified: isVerified,
+                        bio: "Node terhubung ke ZYNC Cloud."
+                    };
+                    await setDoc(doc(db, "users", userCred.user.uid), userData);
+                }
+            } catch (error) {
+                alert("Matrix menolak: " + error.message);
+            } finally {
+                btn.innerText = isLoginMode ? "Log In" : "Daftar"; btn.disabled = false;
             }
-        }
+        };
 
-        function saveProfile() {
-            currentUser.name = document.getElementById('set-name').value; currentUser.bio = document.getElementById('set-bio').value; currentUser.link = document.getElementById('set-link').value;
-            localStorage.setItem('zync_session', JSON.stringify(currentUser));
-            let users = JSON.parse(localStorage.getItem('zync_users')) || [];
-            let uIndex = users.findIndex(u => u.email === currentUser.email);
-            if(uIndex > -1) { users[uIndex] = {...users[uIndex], ...currentUser}; localStorage.setItem('zync_users', JSON.stringify(users)); }
-            alert("Profil Diperbarui!"); bukaTab('profile');
-        }
+        window.logoutFromMatrix = () => { signOut(auth).then(() => location.reload()); };
 
+        // FIREBASE REAL-TIME LISTENER (THE MAGIC HAPPENS HERE)
+        onAuthStateChanged(auth, async (userAuth) => {
+            if (userAuth) {
+                // Get User Profile from Firestore
+                const userDoc = await getDoc(doc(db, "users", userAuth.uid));
+                if (userDoc.exists()) {
+                    window.currentUser = userDoc.data();
+                    document.getElementById('p-auth').style.display = 'none';
+                    document.getElementById('main-app').classList.remove('hidden');
+                    
+                    // Set Global Avatars
+                    document.getElementById('nav-my-avatar').src = window.currentUser.avatar;
+                    document.getElementById('post-my-avatar').src = window.currentUser.avatar;
+                    document.getElementById('prof-avatar').src = window.currentUser.avatar;
+                    document.getElementById('my-comment-avatar').src = window.currentUser.avatar;
+                    document.getElementById('prof-name').innerText = window.currentUser.name;
+                    document.getElementById('prof-user').innerText = window.currentUser.user;
+                    if(window.currentUser.verified) document.getElementById('prof-badge').classList.remove('hidden');
+                    
+                    window.bukaTab('home');
+
+                    // ⚡ LISTEN TO REAL-TIME POSTS FROM FIRESTORE ⚡
+                    const q = query(collection(db, "transmissions"), orderBy("timestamp", "desc"));
+                    onSnapshot(q, (snapshot) => {
+                        window.allPosts = [];
+                        snapshot.forEach((doc) => {
+                            window.allPosts.push({ id: doc.id, ...doc.data() });
+                        });
+                        renderFeed();
+                        if(document.getElementById('p-profile').classList.contains('active')){
+                            let myPostsCount = window.allPosts.filter(p => p.user === window.currentUser.user).length;
+                            document.getElementById('stat-posts').innerText = myPostsCount;
+                        }
+                    });
+                }
+            } else {
+                document.getElementById('p-auth').style.display = 'flex';
+                document.getElementById('main-app').classList.add('hidden');
+            }
+        });
+
+        // POST, LIKE, AND COMMENT LOGIC (CLOUD)
+        window.kirimPost = async () => {
+            const content = document.getElementById('post-content').value;
+            const img = document.getElementById('post-img').value;
+            const btn = document.getElementById('btn-broadcast');
+            
+            if(!content && !img) return;
+            btn.innerText = "Uploading..."; btn.disabled = true;
+            
+            try {
+                await addDoc(collection(db, "transmissions"), {
+                    name: window.currentUser.name,
+                    user: window.currentUser.user,
+                    avatar: window.currentUser.avatar,
+                    verified: window.currentUser.verified,
+                    content: content,
+                    img: img,
+                    likes: 0,
+                    likedBy: [], // Array to track who liked
+                    comments: [],
+                    timestamp: new Date().toISOString()
+                });
+                document.getElementById('post-content').value = ""; document.getElementById('post-img').value = "";
+                window.bukaTab('home');
+            } catch (e) {
+                alert("Gagal memancarkan transmisi: " + e.message);
+            } finally {
+                btn.innerText = "Broadcast"; btn.disabled = false;
+            }
+        };
+
+        window.toggleLikeCloud = async (postId, currentLikedBy) => {
+            const postRef = doc(db, "transmissions", postId);
+            const myUid = window.currentUser.uid;
+            const isAlreadyLiked = currentLikedBy.includes(myUid);
+            
+            // UI Optimistic Update (Biar berasa instan)
+            const icon = document.getElementById(`like-icon-${postId}`);
+            const count = document.getElementById(`like-count-${postId}`);
+            let currentLikes = parseInt(count.innerText.replace(/,/g, ''));
+            
+            if (isAlreadyLiked) {
+                icon.classList.remove('fas', 'is-liked'); icon.classList.add('far');
+                count.innerText = (currentLikes - 1).toLocaleString();
+                // Update Firestore
+                await updateDoc(postRef, { likes: currentLikes - 1, likedBy: currentLikedBy.filter(id => id !== myUid) });
+            } else {
+                icon.classList.remove('far'); icon.classList.add('fas', 'is-liked');
+                icon.classList.remove('animate-burst'); void icon.offsetWidth; icon.classList.add('animate-burst');
+                count.innerText = (currentLikes + 1).toLocaleString();
+                // Update Firestore
+                await updateDoc(postRef, { likes: currentLikes + 1, likedBy: [...currentLikedBy, myUid] });
+            }
+        };
+
+        window.handleDoubleTapCloud = (postId, currentLikedBy, element) => {
+            const heart = element.querySelector('.center-heart');
+            heart.classList.remove('animate-burst'); void heart.offsetWidth; heart.classList.add('animate-burst');
+            if(!currentLikedBy.includes(window.currentUser.uid)) {
+                window.toggleLikeCloud(postId, currentLikedBy);
+            }
+        };
+
+        window.openComments = (postId) => {
+            window.currentPostIdForComment = postId;
+            document.getElementById('overlay').classList.add('open');
+            document.getElementById('comment-modal').classList.add('open');
+            const post = window.allPosts.find(p => p.id === postId);
+            renderCommentsUI(post.comments || []);
+        };
+
+        window.closeComments = () => { document.getElementById('comment-modal').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); };
+        window.closeAllModals = () => { document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('open')); document.getElementById('overlay').classList.remove('open'); };
+
+        window.postComment = async () => {
+            const input = document.getElementById('comment-input');
+            const txt = input.value.trim();
+            if(!txt || !window.currentPostIdForComment) return;
+            
+            const newComment = { user: window.currentUser.user, text: txt, time: new Date().toISOString() };
+            const postRef = doc(db, "transmissions", window.currentPostIdForComment);
+            
+            input.value = "Mengirim..."; input.disabled = true;
+            await updateDoc(postRef, { comments: arrayUnion(newComment) });
+            input.value = ""; input.disabled = false;
+        };
+
+        // UI RENDERING ENGINES
         function processText(text) {
             let res = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="smart-link">$1</a>');
             res = res.replace(/#(\w+)/g, '<span class="smart-tag">#$1</span>');
-            res = res.replace(/@(\w+)/g, '<span class="smart-mention">@$1</span>');
             return res;
         }
 
-        function handleDoubleTap(id, element) {
-            const heart = element.querySelector('.center-heart'); heart.classList.remove('animate-burst'); void heart.offsetWidth; heart.classList.add('animate-burst');
-            const p = posts.find(x => x.id === id);
-            if(p && !p.isLiked) { p.isLiked = true; p.likes++; aura += 15; localStorage.setItem('zync_aura', aura); localStorage.setItem('zync_db', JSON.stringify(posts)); renderFeed(); }
-        }
-
-        function toggleAction(id, action) {
-            const p = posts.find(x => x.id === id);
-            if(p) { if(action === 'like') { p.isLiked = !p.isLiked; p.likes += p.isLiked ? 1 : -1; } if(action === 'save') p.saved = !p.saved; localStorage.setItem('zync_db', JSON.stringify(posts)); renderFeed(); }
-        }
-
-        function votePoll(postId, option) {
-            const p = posts.find(x => x.id === postId);
-            if(p && p.poll && !p.poll.voted) { if(option === 1) p.poll.v1++; else p.poll.v2++; p.poll.voted = true; aura += 5; localStorage.setItem('zync_aura', aura); localStorage.setItem('zync_db', JSON.stringify(posts)); renderFeed(); }
-        }
-
-        function openComments(id) { currentPostIdForComment = id; document.getElementById('overlay').classList.add('open'); const p = posts.find(x => x.id === id); renderComments(p.comments); document.getElementById('comment-modal').classList.add('open'); }
-        function closeComments() { document.getElementById('comment-modal').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
-        function openShare() { document.getElementById('overlay').classList.add('open'); document.getElementById('share-modal').classList.add('open'); }
-        function closeAllModals() { document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('open')); document.getElementById('overlay').classList.remove('open'); }
-
-        function renderComments(comments) {
-            let html = comments.length === 0 ? '<p class="text-center text-slate-500 text-sm mt-4">Belum ada komentar.</p>' : '';
-            comments.forEach(c => { html += `<div class="flex gap-3 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user}" class="w-8 h-8 rounded-full"><div><span class="font-bold text-sm text-white">${c.user}</span> <span class="text-sm">${processText(c.text)}</span></div></div>`; });
+        function renderCommentsUI(comments) {
+            let html = comments.length === 0 ? '<p class="text-center text-slate-500 text-sm mt-4">Jadilah yang pertama merespon.</p>' : '';
+            comments.forEach(c => { html += `<div class="flex gap-3 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user}" class="w-8 h-8 rounded-full bg-slate-800"><div><span class="font-bold text-sm text-white">${c.user}</span> <span class="text-sm">${processText(c.text)}</span></div></div>`; });
             document.getElementById('comment-list').innerHTML = html;
-        }
-
-        function postComment() {
-            const input = document.getElementById('comment-input'); const txt = input.value.trim();
-            if(!txt || !currentPostIdForComment) return;
-            const p = posts.find(x => x.id === currentPostIdForComment);
-            p.comments.push({user: currentUser.user, text: txt}); localStorage.setItem('zync_db', JSON.stringify(posts));
-            input.value = ""; renderComments(p.comments); renderFeed();
         }
 
         function renderFeed() {
             let h = '';
-            posts.forEach(p => {
+            if(window.allPosts.length === 0) h = '<p class="text-center text-slate-500 text-sm mt-10">Matrix masih kosong. Mulai transmisi pertamamu!</p>';
+            
+            window.allPosts.forEach(p => {
                 let txt = processText(p.content);
-                let pollHtml = '';
-                if(p.poll) {
-                    let total = p.poll.v1 + p.poll.v2 || 1; let p1 = Math.round((p.poll.v1/total)*100); let p2 = Math.round((p.poll.v2/total)*100);
-                    pollHtml = `<div class="mt-3 px-4 mb-2"><div class="poll-bar" onclick="votePoll(${p.id}, 1)"><div class="poll-fill" style="width: ${p.poll.voted ? p1 : 0}%"></div><div class="absolute inset-0 flex justify-between px-3 items-center text-[10px] font-bold z-10"><span>${p.poll.o1}</span> ${p.poll.voted ? `<span>${p1}%</span>` : ''}</div></div><div class="poll-bar" onclick="votePoll(${p.id}, 2)"><div class="poll-fill" style="width: ${p.poll.voted ? p2 : 0}%"></div><div class="absolute inset-0 flex justify-between px-3 items-center text-[10px] font-bold z-10"><span>${p.poll.o2}</span> ${p.poll.voted ? `<span>${p2}%</span>` : ''}</div></div></div>`;
-                }
+                let likedByArray = p.likedBy || [];
+                let isLikedByMe = likedByArray.includes(window.currentUser.uid);
+                let timeStr = new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
                 h += `
                 <div class="post-card mb-4 pb-2">
                     <div class="flex justify-between items-center px-3 py-2">
-                        <div class="flex items-center gap-2 cursor-pointer"><div class="w-8 h-8 rounded-full zync-ring-active"><img src="${p.avatar}" class="w-full h-full rounded-full border border-[#020617] object-cover"></div><div class="flex flex-col"><span class="font-bold text-sm text-white">${p.name} ${p.verified ? '<i class="fas fa-check-circle verified-badge"></i>' : ''}</span>${p.location ? `<span class="text-[9px] text-slate-400 -mt-0.5">${p.location}</span>` : ''}</div></div>
+                        <div class="flex items-center gap-2 cursor-pointer">
+                            <div class="w-8 h-8 rounded-full zync-ring-active"><img src="${p.avatar}" class="w-full h-full rounded-full border border-[#020617] object-cover"></div>
+                            <div class="flex flex-col"><span class="font-bold text-sm text-white">${p.name} ${p.verified ? '<i class="fas fa-check-circle verified-badge"></i>' : ''}</span><span class="text-[9px] text-slate-400 -mt-0.5">${p.user}</span></div>
+                        </div>
                         <i class="fas fa-ellipsis-h text-slate-300"></i>
                     </div>
-                    <div class="relative w-full min-h-[50px] flex items-center justify-center" ondblclick="handleDoubleTap(${p.id}, this)">
+                    
+                    <div class="relative w-full min-h-[50px] flex items-center justify-center" ondblclick='handleDoubleTapCloud("${p.id}", ${JSON.stringify(likedByArray)}, this)'>
                         <i class="fas fa-heart center-heart"></i>
                         ${p.img ? `<img src="${p.img}" class="w-full h-auto max-h-[500px] object-cover">` : `<p class="px-5 py-4 text-sm font-medium w-full text-left">${txt}</p>`}
                     </div>
+                    
                     ${p.img ? `<div class="px-4 pt-2 text-sm"><span class="font-bold mr-1">${p.user}</span><span>${txt}</span></div>` : ''}
-                    ${pollHtml}
+
                     <div class="flex justify-between items-center px-3 py-2 text-xl text-white mt-1">
-                        <div class="flex gap-4"><i class="${p.isLiked ? 'fas is-liked' : 'far'} fa-heart transition-all cursor-pointer" onclick="toggleAction(${p.id}, 'like')"></i><i class="far fa-comment cursor-pointer hover:text-cyan-400" onclick="openComments(${p.id})"></i><i class="far fa-paper-plane cursor-pointer hover:text-cyan-400" onclick="openShare()"></i></div>
-                        <i class="${p.saved ? 'fas is-saved' : 'far'} fa-bookmark transition-all cursor-pointer" onclick="toggleAction(${p.id}, 'save')"></i>
+                        <div class="flex gap-4">
+                            <i id="like-icon-${p.id}" class="${isLikedByMe ? 'fas is-liked' : 'far'} fa-heart transition-all cursor-pointer" onclick='toggleLikeCloud("${p.id}", ${JSON.stringify(likedByArray)})'></i>
+                            <i class="far fa-comment cursor-pointer hover:text-cyan-400" onclick='openComments("${p.id}")'></i>
+                        </div>
+                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">${timeStr}</span>
                     </div>
+
                     <div class="px-4 text-sm">
-                        <p class="font-bold mb-0.5 text-xs">${p.likes.toLocaleString()} Suka</p>
-                        ${p.comments.length > 0 ? `<p class="text-slate-500 mt-1 cursor-pointer text-xs" onclick="openComments(${p.id})">Lihat semua komentar</p>` : ''}
+                        <p class="font-bold mb-0.5 text-xs"><span id="like-count-${p.id}">${p.likes.toLocaleString()}</span> Suka</p>
+                        ${p.comments && p.comments.length > 0 ? `<p class="text-slate-500 mt-1 cursor-pointer text-xs" onclick='openComments("${p.id}")'>Lihat semua ${p.comments.length} komentar</p>` : ''}
                     </div>
                 </div>`;
             });
             document.getElementById('feed-container').innerHTML = h;
-        }
-
-        function renderStories() { let users = JSON.parse(localStorage.getItem('zync_users')) || []; document.getElementById('story-list').innerHTML = users.slice(0, 8).map(u => `<div class="flex flex-col items-center gap-1 shrink-0"><div class="w-16 h-16 rounded-full zync-ring-active"><img src="${u.avatar}" class="w-full h-full rounded-full border-2 border-[#020617] object-cover"></div><span class="text-[10px] text-slate-300 truncate w-16 text-center">${u.user}</span></div>`).join(''); }
-        function renderExplore() { let imgs = posts.filter(p => p.img).map(p => `<div class="grid-item" onclick="bukaTab('home')"><img src="${p.img}"></div>`).join(''); document.getElementById('explore-grid').innerHTML = imgs + imgs + imgs + imgs; }
-        function renderProfileGrid(myPosts) { let h = ''; myPosts.forEach(p => { if(p.img) h += `<div class="grid-item"><img src="${p.img}"><div class="absolute top-1 right-1 text-white text-xs"><i class="fas fa-clone"></i></div></div>`; else h += `<div class="grid-item flex items-center justify-center p-2 text-center text-[10px] font-bold bg-slate-800 dynamic-text border border-white/5">${p.content.substring(0,30)}...</div>`; }); document.getElementById('profile-grid').innerHTML = h; }
-        function renderReels() { let h = ''; reelsData.forEach(url => { h += `<div class="reel-item"><img src="${url}" class="w-full h-full object-cover opacity-80"><div class="absolute bottom-16 left-4 text-white"><div class="flex items-center gap-2 mb-2"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Zync" class="w-8 h-8 rounded-full border border-white"><span class="font-bold text-sm">Zync_Core</span></div><p class="text-sm">Matrix Scroll. #ZyncIt</p></div><div class="absolute bottom-16 right-4 flex flex-col gap-5 text-white items-center text-2xl drop-shadow-lg"><i class="far fa-heart"></i><i class="far fa-comment"></i><i class="far fa-paper-plane" onclick="openShare()"></i><i class="fas fa-ellipsis-v text-lg"></i></div></div>`; }); document.getElementById('reels-container').innerHTML = h; }
-        function renderNotif() { let users = JSON.parse(localStorage.getItem('zync_users')) || []; let h = ''; users.forEach((u, i) => { if(u.user !== currentUser.user && i < 10) { h += `<div class="flex items-center gap-4 border-b border-white/5 pb-3"><img src="${u.avatar}" class="w-10 h-10 rounded-full border border-white/10"><div class="flex-1"><p class="text-sm"><span class="font-bold text-white">${u.user}</span> bergabung dalam Matrix.</p><p class="text-[10px] text-slate-500 mt-0.5">Baru saja</p></div></div>`; } }); document.getElementById('notif-container').innerHTML = h; }
-
-        function kirimPost() {
-            const c = document.getElementById('post-content').value; const img = document.getElementById('post-img').value; const loc = document.getElementById('post-loc').value; const isPollActive = !document.getElementById('poll-inputs').classList.contains('hidden'); const o1 = document.getElementById('poll-opt-1').value; const o2 = document.getElementById('poll-opt-2').value;
-            if(!c && !img && !isPollActive) return;
-            let pollData = null; if(isPollActive && o1 && o2) pollData = { q: c || "Polling Matrix", o1: o1, o2: o2, v1: 0, v2: 0, voted: false };
-            aura += 50; localStorage.setItem('zync_aura', aura);
-            posts.unshift({ id: Date.now(), name: currentUser.name, user: currentUser.user, avatar: currentUser.avatar, content: c, img: img, location: loc, likes: 0, views: 0, isLiked: false, saved: false, verified: currentUser.verified, time: "Baru saja", comments: [], commentsAllowed: true, poll: pollData });
-            localStorage.setItem('zync_db', JSON.stringify(posts));
-            document.getElementById('post-content').value = ""; document.getElementById('post-img').value = ""; document.getElementById('post-loc').value = ""; document.getElementById('poll-opt-1').value = ""; document.getElementById('poll-opt-2').value = ""; document.getElementById('poll-inputs').classList.add('hidden'); document.getElementById('toggle-poll').checked = false;
-            bukaTab('home');
-        }
-
-        window.onload = () => {
-            if(currentUser) {
-                document.getElementById('p-auth').style.display = 'none'; document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('nav-my-avatar').src = currentUser.avatar; document.getElementById('my-story-avatar').src = currentUser.avatar; document.getElementById('post-my-avatar').src = currentUser.avatar; document.getElementById('prof-avatar').src = currentUser.avatar; document.getElementById('my-comment-avatar').src = currentUser.avatar;
-                bukaTab('home');
+            
+            // Update comments live if modal is open
+            if(window.currentPostIdForComment && document.getElementById('comment-modal').classList.contains('open')) {
+                const post = window.allPosts.find(x => x.id === window.currentPostIdForComment);
+                if(post) renderCommentsUI(post.comments || []);
             }
-        };
+        }
     </script>
-    <script type="module" src="auth.js"></script>
 </body>
 </html>
