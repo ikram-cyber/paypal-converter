@@ -1,13 +1,19 @@
 import { State } from './state.js';
+import { AuthAPI } from '../api/auth-api.js';
+import { LoginUI } from '../features/auth/login.js';
 
 class ZyncApp {
     constructor() {
         this.root = document.getElementById('app-root');
         this.initVisuals();
-        this.render();
+        
+        // ⚡ Listener Real-Time dari Firebase
+        // Otomatis mengganti layar kalau status login berubah
+        AuthAPI.listen((user) => {
+            this.render();
+        });
     }
 
-    // Efek Partikel Background
     initVisuals() {
         const canvas = document.getElementById('bg-canvas'); 
         const ctx = canvas.getContext('2d');
@@ -26,37 +32,18 @@ class ZyncApp {
         drawBg();
     }
 
-    // Mesin Render Halaman
     render() {
-        this.root.innerHTML = ''; // Bersihkan layar
-
+        this.root.innerHTML = ''; 
         if (!State.currentUser) {
-            // Jika belum login, tampilkan Gateway (Pintu Masuk)
             this.renderGateway();
         } else {
-            // Jika sudah login, tampilkan Aplikasi Utama
             this.renderMainLayout();
         }
     }
 
     renderGateway() {
-        this.root.innerHTML = `
-            <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center page-enter">
-                <div class="mb-10">
-                    <h1 class="text-5xl font-black tracking-[0.3em] text-white" style="text-shadow: 0 0 20px rgba(34, 211, 238, 0.6);">ZY<span class="text-cyan-400">NC</span></h1>
-                    <p class="text-[10px] font-mono uppercase tracking-[0.4em] mt-3 text-cyan-500">Identity Gateway</p>
-                </div>
-                <div class="w-full max-w-sm glass-panel rounded-[2rem] p-8">
-                    <button id="btn-mock-login" class="w-full bg-cyan-500 text-[#020617] py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-[0_0_15px_rgba(34,211,238,0.4)]">Masuk Mode Tamu</button>
-                </div>
-            </div>
-        `;
-
-        // Simulasi Login (Akan diganti dengan auth/login.js nanti)
-        document.getElementById('btn-mock-login').addEventListener('click', () => {
-            State.setUser({ user: "@ikram", name: "Ikram Cyber", verified: true });
-            this.render(); // Render ulang layar ke Aplikasi Utama
-        });
+        this.root.innerHTML = LoginUI.render();
+        LoginUI.attachEvents();
     }
 
     renderMainLayout() {
@@ -64,24 +51,36 @@ class ZyncApp {
             <div class="page-enter">
                 <header class="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center bg-gradient-to-b from-[#020617] to-transparent">
                     <h1 class="text-2xl font-black tracking-widest text-white">ZY<span class="text-cyan-400">NC</span></h1>
-                    <button id="btn-logout" class="text-rose-500 font-bold text-xs bg-rose-500/20 px-3 py-1 rounded-lg">Logout</button>
+                    <div class="flex items-center gap-4">
+                        <img src="${State.currentUser.avatar}" class="w-8 h-8 rounded-full border border-cyan-500 bg-slate-800 object-cover">
+                        <button id="btn-logout" class="text-rose-500 font-bold text-[10px] uppercase tracking-widest bg-rose-500/10 px-4 py-2 rounded-xl border border-rose-500/50 hover:bg-rose-500 hover:text-white transition-colors">Disconnect</button>
+                    </div>
                 </header>
                 
-                <main class="pt-24 px-6 text-center">
-                    <h2 class="text-2xl font-bold text-white">Selamat Datang di Matrix!</h2>
-                    <p class="text-cyan-400 font-mono mt-2">${State.currentUser.user}</p>
-                    <p class="text-slate-400 text-sm mt-6">Mesin utama berhasil berjalan. Siap menyuntikkan 500 fitur.</p>
+                <main class="pt-28 px-6 text-center">
+                    <div class="w-32 h-32 mx-auto rounded-full border-2 border-dashed border-cyan-500 p-1.5 mb-6 relative">
+                        <div class="absolute inset-0 rounded-full border border-cyan-500/50 animate-ping"></div>
+                        <img src="${State.currentUser.avatar}" class="w-full h-full rounded-full object-cover bg-slate-800">
+                    </div>
+                    <h2 class="text-3xl font-black text-white flex justify-center items-center gap-2 mb-1">
+                        ${State.currentUser.name} 
+                        ${State.currentUser.verified ? '<i class="fas fa-check-circle text-cyan-400 text-lg"></i>' : ''}
+                    </h2>
+                    <p class="text-cyan-400 font-mono text-sm">${State.currentUser.user}</p>
+                    
+                    <div class="glass-panel mt-8 p-5 rounded-2xl max-w-sm mx-auto text-left">
+                        <p class="text-slate-400 text-xs font-mono mb-2">> STATUS: <span class="text-emerald-400 font-bold">ONLINE</span></p>
+                        <p class="text-slate-400 text-xs font-mono mb-2">> UID: <span class="text-cyan-400">${State.currentUser.uid.substring(0,8)}...</span></p>
+                        <p class="text-slate-400 text-xs font-mono">> MODULE: Authentication & Cloud Firestore <span class="text-emerald-400">ACTIVE</span></p>
+                    </div>
                 </main>
             </div>
         `;
 
-        // Logika Logout
         document.getElementById('btn-logout').addEventListener('click', () => {
-            State.setUser(null);
-            this.render(); // Kembali ke Gateway
+            AuthAPI.logout();
         });
     }
 }
 
-// Jalankan Mesin saat file di-load
 new ZyncApp();
