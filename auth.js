@@ -1,142 +1,87 @@
-import { auth, db } from './firebase-config.js';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
-import {
-  doc, setDoc, getDoc
-} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+// MESIN AUTHENTICATION & DATABASE ZYNC
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js"; // Mengambil config dari repo Bos
 
-// CEK STATUS LOGIN
-const halaman = window.location.pathname;
+// Inisialisasi Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    if (halaman.includes('index.html') || 
-        halaman.includes('register.html') || 
-        halaman === '/') {
-      window.location.href = 'dashboard.html';
+// Mengambil alih (Override) tombol Login/Register dari index.html ke Firebase
+window.handleAuth = async () => {
+    const email = document.getElementById('auth-email').value;
+    const pass = document.getElementById('auth-pass').value;
+    const user = document.getElementById('auth-user').value;
+    const btn = document.getElementById('auth-btn');
+
+    if(!email || !pass) return alert("Matrix menolak! Kredensial tidak boleh kosong.");
+    
+    // Efek Loading
+    const originalText = btn.innerText;
+    btn.innerText = "Membuka Enkripsi...";
+    btn.disabled = true;
+
+    try {
+        if(isLoginMode) {
+            // PROSES LOGIN KE FIREBASE
+            const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+            const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+            
+            if (userDoc.exists()) {
+                // Simpan sesi ke local untuk loading cepat UI
+                localStorage.setItem('zync_session', JSON.stringify(userDoc.data()));
+                location.reload();
+            } else {
+                alert("Data profil tidak ditemukan di Matrix!");
+            }
+        } else {
+            // PROSES REGISTER KE FIREBASE
+            if(!user) throw new Error("Username wajib diisi untuk membuat node baru!");
+            
+            const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+            
+            // Otomatis Verified khusus untuk Bos (mengandung kata 'ikram')
+            const isVerified = user.toLowerCase().includes('ikram');
+            
+            // Siapkan struktur data profil ZYNC
+            const userData = {
+                uid: userCredential.user.uid,
+                user: "@" + user.replace(/\s+/g,'').toLowerCase(),
+                name: user,
+                email: email,
+                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user}`,
+                verified: isVerified,
+                bio: "Node baru di jaringan ZYNC.",
+                link: "",
+                aura: 0,
+                joinedAt: new Date().toISOString()
+            };
+
+            // Simpan profil ke Cloud Firestore
+            await setDoc(doc(db, "users", userCredential.user.uid), userData);
+            
+            alert("Identitas berhasil dienkripsi ke Matrix ZYNC! Silakan Log In.");
+            toggleAuth(); // Kembali ke tampilan Login
+        }
+    } catch (error) {
+        let msg = "Terjadi anomali: " + error.message;
+        if(error.code === 'auth/email-already-in-use') msg = "Email ini sudah terdaftar di jaringan!";
+        if(error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') msg = "Akses Ditolak. Email atau Security Key salah.";
+        alert(msg);
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
     }
-    if (halaman.includes('dashboard.html')) {
-      const docSnap = await getDoc(doc(db, "users", user.uid));
-      if (docSnap.exists()) {
-        document.getElementById('namaUser').textContent = 
-          docSnap.data().nama;
-        document.getElementById('emailUser').textContent = 
-          user.email;
-      }
-    }
-  } else {
-    if (!halaman.includes('index.html') && 
-        !halaman.includes('register.html') && 
-        halaman !== '/') {
-      window.location.href = 'index.html';
-    }
-  }
-});
-
-// FUNGSI LOGIN
-window.login = async function() {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const alertBox = document.getElementById('alertBox');
-
-  if (!email || !password) {
-    alertBox.innerHTML = 
-      '<div class="alert alert-error">Email & password wajib diisi!</div>';
-    return;
-  }
-
-  document.getElementById('loading').style.display = 'flex';
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = 'dashboard.html';
-  } catch (error) {
-    document.getElementById('loading').style.display = 'none';
-    alertBox.innerHTML = 
-      '<div class="alert alert-error">Email atau password salah!</div>';
-  }
 };
 
-// FUNGSI REGISTER
-window.register = async function() {
-  const nama = document.getElementById('nama').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const paypalEmail = document.getElementById('paypalEmail').value.trim();
-  const password = document.getElementById('password').value;
-  const konfirmasi = document.getElementById('konfirmasi').value;
-  const alertBox = document.getElementById('alertBox');
-
-  if (!nama || !email || !paypalEmail || !password || !konfirmasi) {
-    alertBox.innerHTML = 
-      '<div class="alert alert-error">Semua field wajib diisi!</div>';
-    return;
-  }
-
-  if (password.length < 6) {
-    alertBox.innerHTML = 
-      '<div class="alert alert-error">Password minimal 6 karakter!</div>';
-    return;
-  }
-
-  if (password !== konfirmasi) {
-    alertBox.innerHTML = 
-      '<div class="alert alert-error">Password tidak cocok!</div>';
-    return;
-  }
-
-  document.getElementById('loading').style.display = 'flex';
-
-  try {
-    const userCred = await createUserWithEmailAndPassword(
-      auth, email, password
-    );
-    await setDoc(doc(db, "users", userCred.user.uid), {
-      nama: nama,
-      email: email,
-      paypalEmail: paypalEmail,
-      createdAt: new Date().toISOString()
+// Mengambil alih tombol Logout
+window.logout = () => {
+    signOut(auth).then(() => {
+        localStorage.removeItem('zync_session');
+        location.reload();
+    }).catch((error) => {
+        alert("Gagal keluar dari Matrix: " + error.message);
     });
-    alertBox.innerHTML = 
-      '<div class="alert alert-success">Registrasi berhasil! Mengalihkan...</div>';
-    setTimeout(() => window.location.href = 'dashboard.html', 1500);
-  } catch (error) {
-    document.getElementById('loading').style.display = 'none';
-    alertBox.innerHTML = 
-      `<div class="alert alert-error">Gagal daftar: ${error.message}</div>`;
-  }
-};
-
-// FUNGSI LUPA PASSWORD
-window.lupaPassword = async function() {
-  const email = document.getElementById('email').value.trim();
-  const alertBox = document.getElementById('alertBox');
-
-  if (!email) {
-    alertBox.innerHTML =
-      '<div class="alert alert-warning">⚠️ Masukkan email kamu dulu!</div>';
-    return;
-  }
-
-  try {
-    const { sendPasswordResetEmail } = await import(
-      "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"
-    );
-    await sendPasswordResetEmail(auth, email);
-    alertBox.innerHTML =
-      '<div class="alert alert-success">✅ Link reset password sudah dikirim ke email kamu! Cek inbox/spam!</div>';
-  } catch (error) {
-    alertBox.innerHTML =
-      '<div class="alert alert-error">❌ Email tidak ditemukan!</div>';
-  }
-};
-
-
-// FUNGSI LOGOUT
-window.logout = async function() {
-  await signOut(auth);
-  window.location.href = 'index.html';
 };
