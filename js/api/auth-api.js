@@ -1,53 +1,28 @@
 import { auth, db } from './firebase.js';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { State } from '../core/state.js';
 
 export const AuthAPI = {
-    async login(email, password) {
-        // .trim() untuk hapus spasi tak sengaja
-        const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
-        const userDoc = await getDoc(doc(db, "users", cred.user.uid));
-        if(userDoc.exists()) {
-            State.setUser(userDoc.data());
-            return userDoc.data();
-        }
-        throw new Error("Data user tidak ditemukan di database.");
+    async login(email, pass) {
+        const c = await signInWithEmailAndPassword(auth, email, pass);
+        const d = await getDoc(doc(db, "users", c.user.uid));
+        if(d.exists()) State.setUser(d.data());
     },
-    async register(email, password, username) {
-        const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
-        const isVerified = username.toLowerCase().includes('ikram');
-        const userData = {
-            uid: cred.user.uid,
-            user: "@" + username.replace(/\s+/g,'').toLowerCase(),
-            name: username,
-            email: email.trim(),
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-            verified: isVerified,
-            bio: "Node terhubung ke ZYNC Cloud."
-        };
-        await setDoc(doc(db, "users", cred.user.uid), userData);
-        State.setUser(userData);
-        return userData;
+    async register(email, pass, user) {
+        const c = await createUserWithEmailAndPassword(auth, email, pass);
+        const data = { uid: c.user.uid, user: "@"+user.toLowerCase(), name: user, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user}`, verified: user.toLowerCase().includes('ikram'), timestamp: new Date().toISOString() };
+        await setDoc(doc(db, "users", c.user.uid), data);
+        State.setUser(data);
     },
-    async logout() {
-        localStorage.clear(); // Hapus semua cache lama
-        await signOut(auth);
-        State.setUser(null);
-        window.location.reload(); // Refresh total agar sistem bersih
-    },
-    listen(callback) {
-        onAuthStateChanged(auth, async (user) => {
-            if(user) {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if(userDoc.exists()) {
-                    State.setUser(userDoc.data());
-                    callback(userDoc.data());
-                }
-            } else {
-                State.setUser(null);
-                callback(null);
-            }
+    async logout() { await signOut(auth); State.setUser(null); location.reload(); },
+    listen(cb) {
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                const d = await getDoc(doc(db, "users", u.uid));
+                if(d.exists()) State.setUser(d.data());
+            } else { State.setUser(null); }
+            cb();
         });
     }
 };
