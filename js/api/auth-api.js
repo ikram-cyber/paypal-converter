@@ -30,7 +30,6 @@ export const AuthAPI = {
         await signOut(auth);
         State.setUser(null);
     },
-    // Listener: Selalu memantau apakah user sedang online atau offline
     listen(callback) {
         onAuthStateChanged(auth, async (user) => {
             if(user) {

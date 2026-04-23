@@ -7,8 +7,6 @@ class ZyncApp {
         this.root = document.getElementById('app-root');
         this.initVisuals();
         
-        // ⚡ Listener Real-Time dari Firebase
-        // Otomatis mengganti layar kalau status login berubah
         AuthAPI.listen((user) => {
             this.render();
         });
@@ -48,38 +46,24 @@ class ZyncApp {
 
     renderMainLayout() {
         this.root.innerHTML = `
-            <div class="page-enter">
+            <div class="page-enter relative z-10">
                 <header class="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center bg-gradient-to-b from-[#020617] to-transparent">
                     <h1 class="text-2xl font-black tracking-widest text-white">ZY<span class="text-cyan-400">NC</span></h1>
-                    <div class="flex items-center gap-4">
-                        <img src="${State.currentUser.avatar}" class="w-8 h-8 rounded-full border border-cyan-500 bg-slate-800 object-cover">
-                        <button id="btn-logout" class="text-rose-500 font-bold text-[10px] uppercase tracking-widest bg-rose-500/10 px-4 py-2 rounded-xl border border-rose-500/50 hover:bg-rose-500 hover:text-white transition-colors">Disconnect</button>
-                    </div>
+                    <button id="btn-logout" class="text-rose-500 font-bold text-xs bg-rose-500/10 px-4 py-2 rounded-xl border border-rose-500/50">Disconnect</button>
                 </header>
                 
                 <main class="pt-28 px-6 text-center">
-                    <div class="w-32 h-32 mx-auto rounded-full border-2 border-dashed border-cyan-500 p-1.5 mb-6 relative">
-                        <div class="absolute inset-0 rounded-full border border-cyan-500/50 animate-ping"></div>
-                        <img src="${State.currentUser.avatar}" class="w-full h-full rounded-full object-cover bg-slate-800">
-                    </div>
-                    <h2 class="text-3xl font-black text-white flex justify-center items-center gap-2 mb-1">
-                        ${State.currentUser.name} 
-                        ${State.currentUser.verified ? '<i class="fas fa-check-circle text-cyan-400 text-lg"></i>' : ''}
-                    </h2>
+                    <img src="${State.currentUser.avatar}" class="w-32 h-32 mx-auto rounded-full border-2 border-dashed border-cyan-500 p-1 mb-4 bg-slate-800 object-cover">
+                    <h2 class="text-2xl font-black text-white">${State.currentUser.name}</h2>
                     <p class="text-cyan-400 font-mono text-sm">${State.currentUser.user}</p>
-                    
                     <div class="glass-panel mt-8 p-5 rounded-2xl max-w-sm mx-auto text-left">
-                        <p class="text-slate-400 text-xs font-mono mb-2">> STATUS: <span class="text-emerald-400 font-bold">ONLINE</span></p>
-                        <p class="text-slate-400 text-xs font-mono mb-2">> UID: <span class="text-cyan-400">${State.currentUser.uid.substring(0,8)}...</span></p>
-                        <p class="text-slate-400 text-xs font-mono">> MODULE: Authentication & Cloud Firestore <span class="text-emerald-400">ACTIVE</span></p>
+                        <p class="text-emerald-400 text-xs font-mono font-bold">> SYSTEM ONLINE</p>
                     </div>
                 </main>
             </div>
         `;
 
-        document.getElementById('btn-logout').addEventListener('click', () => {
-            AuthAPI.logout();
-        });
+        document.getElementById('btn-logout').addEventListener('click', () => { AuthAPI.logout(); });
     }
 }
 

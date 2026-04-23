@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// Kunci Rahasia Firebase (ikram-social)
 const firebaseConfig = {
     apiKey: "AIzaSyDrNPFvNC-qqB2slfY0F6rtNd1L1cQHAcI",
     authDomain: "ikram-social.firebaseapp.com",

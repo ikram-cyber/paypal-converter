@@ -3,13 +3,13 @@ import { AuthAPI } from '../../api/auth-api.js';
 export const LoginUI = {
     render() {
         return `
-            <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center page-enter">
+            <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center page-enter z-10 relative">
                 <div class="mb-10">
                     <div class="w-24 h-24 rounded-3xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-5xl shadow-[0_0_50px_rgba(34,211,238,0.2)] mx-auto mb-6">
                         <i class="fas fa-fingerprint"></i>
                     </div>
                     <h1 class="text-5xl font-black tracking-[0.3em] text-white" style="text-shadow: 0 0 20px rgba(34, 211, 238, 0.6);">ZY<span class="text-cyan-400">NC</span></h1>
-                    <p class="text-[10px] font-mono uppercase tracking-[0.4em] mt-3 text-cyan-500">Cloud Gateway API</p>
+                    <p class="text-[10px] font-mono uppercase tracking-[0.4em] mt-3 text-cyan-500">Identity Gateway</p>
                 </div>
                 <div class="w-full max-w-sm glass-panel rounded-[2rem] p-8">
                     <h2 id="auth-title" class="text-lg font-bold mb-6 text-white uppercase tracking-widest border-b border-white/10 pb-4">Akses Sistem</h2>
@@ -27,7 +27,7 @@ export const LoginUI = {
             </div>
         `;
     },
-    attachEvents(onSuccess) {
+    attachEvents() {
         let isLoginMode = true;
         const btn = document.getElementById('auth-btn');
         const toggleBtn = document.getElementById('auth-toggle-btn');
@@ -57,7 +57,6 @@ export const LoginUI = {
                     if(!user) throw new Error("Username kosong!");
                     await AuthAPI.register(email, pass, user);
                 }
-                // Jika sukses, AuthAPI.listen di app.js otomatis memicu pindah halaman
             } catch (e) {
                 msgBox.innerText = "Error: " + e.message; msgBox.classList.remove('hidden');
             } finally {
