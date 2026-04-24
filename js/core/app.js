@@ -1,3 +1,4 @@
+import { ComposerUI } from "../features/creation/composer.js";
 import { State } from './state.js';
 import { AuthAPI } from '../api/auth-api.js';
 import { LoginUI } from '../features/auth/login.js';
