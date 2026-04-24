@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Matrix Purge Protocol</title>
+    <style>
+        body { background-color: #020617; color: #06b6d4; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    </style>
+</head>
+<body>
+    <h2><i class="fas fa-skull"></i> INITIATING PURGE PROTOCOL...</h2>
+    <p id="log">Membersihkan cache Netlify lama...</p>
+
+    <script>
+        setTimeout(() => {
+            // 1. Bunuh semua sisa Service Worker dari Netlify
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                        console.log("Service Worker Terminated");
+                    }
+                });
+            }
+
+            // 2. Bersihkan Local Storage (Kecuali sesi Firebase agar tidak perlu login ulang terus)
+            const session = localStorage.getItem('zync_session');
+            localStorage.clear();
+            sessionStorage.clear();
+            if(session) localStorage.setItem('zync_session', session);
+
+            document.getElementById('log').innerText = "SISTEM BERSIH. REBOOTING MATRIX...";
+
+            // 3. Lempar balik ke index.html setelah 2 detik
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 2000);
+            
+        }, 1000);
+    </script>
+</body>
+</html>
